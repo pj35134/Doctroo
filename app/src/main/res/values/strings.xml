@@ -34,5 +34,6 @@
     <string name="Select_image">Select Image</string>
     <string name="capture_image">Capture Image</string>
     <string name="Process">Process</string>
+    <string name="length">*Password length should be greater than 6</string>
 
 </resources>

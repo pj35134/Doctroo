@@ -61,6 +61,13 @@
         style="@style/edittext.password"
         android:id="@+id/password"
    />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/pw_length"
+            android:text="@string/length"
+            android:layout_marginLeft="16dp"
+            android:textColor="@color/white"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
