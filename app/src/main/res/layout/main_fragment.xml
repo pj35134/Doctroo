@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200sp"
+        android:id="@+id/users_skinpic"
+        android:src="@mipmap/cam"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+
+            style="@style/btnstyle"
+            android:id="@+id/select_image"
+            android:text="@string/Select_image"/>
+
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:id="@+id/or"
+          android:paddingTop="10dp"
+          android:text="@string/OR"
+          android:gravity="center"
+          android:layout_gravity="center"/>
+
+
+
+        <Button
+           style="@style/btnstyle"
+            android:text="@string/capture_image"
+            android:id="@+id/capture_image"/>
+        <Button
+           style="@style/btnstyle"
+            android:text="@string/Process"
+            android:id="@+id/process"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>

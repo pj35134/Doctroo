@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "494198142841",
+    "firebase_url": "https://doctro-d6da3.firebaseio.com",
+    "project_id": "doctro-d6da3",
+    "storage_bucket": "doctro-d6da3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494198142841:android:48a80dbbae1477b0",
+        "android_client_info": {
+          "package_name": "com.skincancer.doctro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494198142841-rjcjlk7ttirc89i2nlkoa8cblqr42a9v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skincancer.doctro",
+            "certificate_hash": "2deb4faa5e1d0c84cb060646be5d1f67bac0e749"
+          }
+        },
+        {
+          "client_id": "494198142841-smtqdu46f1vsonv5ktkjmblo8tl5c2g1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhAcI6lBZLEgWwmvuAdgh79EH3YWIP_VA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494198142841-smtqdu46f1vsonv5ktkjmblo8tl5c2g1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
