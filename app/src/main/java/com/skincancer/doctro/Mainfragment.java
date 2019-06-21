@@ -120,7 +120,7 @@ process.setOnClickListener(new View.OnClickListener() {
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                      // Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                      Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
                     }
                 });
 

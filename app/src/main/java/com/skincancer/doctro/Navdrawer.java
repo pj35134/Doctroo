@@ -207,9 +207,9 @@ public class Navdrawer extends AppCompatActivity
            getSupportFragmentManager().beginTransaction().replace(R.id.container,currentFragment).commit();
 
         } else if (id == R.id.gallery) {
-            currentFragment = new Register_fragment();
+           /* currentFragment = new Register_fragment();
             getSupportFragmentManager().beginTransaction().replace(R.id.container,currentFragment).commit();
-
+*/
         } else if (id == R.id.Profile) {
             currentFragment = new ProfileActivity();
             getSupportFragmentManager().beginTransaction().replace(R.id.container,currentFragment).commit();
