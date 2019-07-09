@@ -1,7 +1,9 @@
 package com.skincancer.doctro;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -113,41 +115,57 @@ public class Mainfragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.i("tag", "after1");
-                if (imagePath != null) {
-                    progressDialog.setMessage("Loading .... Please Wait");
-                    progressDialog.show();
-                    Log.i("tag", "aftee");
-                   // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
-                   // for (Uri uri : mArrayUri) {
-                        // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
-                        StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/" + System.currentTimeMillis());
-                        UploadTask uploadTask = imageReference.putFile(imagePath);
-                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
-                            }
-                        });
+                    if (imagePath != null) {
+                        if(GeneralUtils.isNetworkAvailable(getActivity())) {
+                            progressDialog.setMessage("Loading .... Please Wait");
+                            progressDialog.show();
+                            Log.i("tag", "aftee");
+                            // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
+                            // for (Uri uri : mArrayUri) {
+                            // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
+                            StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/" + System.currentTimeMillis());
+                            UploadTask uploadTask = imageReference.putFile(imagePath);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            });
+
+                        }
+                        // }
+                         else{
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Internet Connection Alert")
+                                    .setMessage("Please check your Internet Connection")
+                                    .setPositiveButton("close", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    }).show();
+
+                        }
 
 
-                   // }
+                        //startActivity(new Intent(getActivity(),l.class));
+                    } else {
+                        Log.i("tag", "hbjcdccccc");
+                        Toasty.error(getActivity(), "No image selected", Toasty.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+
+                    }
+                }//
 
 
-                    //startActivity(new Intent(getActivity(),l.class));
-                } else {
-                    Log.i("tag", "hbjcdccccc");
-                    Toasty.error(getActivity(),"No image selected",Toasty.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
 
-                }
-            }
         });
 
 
