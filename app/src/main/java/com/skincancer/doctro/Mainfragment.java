@@ -1,5 +1,6 @@
 package com.skincancer.doctro;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -37,6 +41,7 @@ import java.util.Date;
 import es.dmoral.toasty.Toasty;
 
 import static android.app.Activity.RESULT_OK;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 public class Mainfragment extends Fragment {
 
@@ -46,10 +51,14 @@ public class Mainfragment extends Fragment {
     Bitmap bitmap;
     FirebaseAuth firebaseAuth;
     FirebaseStorage firebaseStorage;
-    StorageReference storageReference,next;
+    ProgressDialog progressDialog;
+    DatabaseReference ref;
+    FirebaseDatabase firebaseDatabase;
+    StorageReference storageReference,next,filepath;
     File file;
-    Uri fileUri;
+    Uri fileUri,pictureUri;
     final int RC_TAKE_PHOTO = 1;
+    String imgString;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +68,7 @@ public class Mainfragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.main_fragment, null);
         users_skinpic = view.findViewById(R.id.users_skinpic);
@@ -67,12 +76,13 @@ public class Mainfragment extends Fragment {
         capture_image = view.findViewById(R.id.capture_image);
         process = view.findViewById(R.id.process);
         firebaseAuth = FirebaseAuth.getInstance();
+        progressDialog = new ProgressDialog(getActivity());
+        firebaseDatabase = FirebaseDatabase.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
-        next=FirebaseStorage.getInstance().getReference();
+        next = FirebaseStorage.getInstance().getReference();
 
-
-
+        ref = firebaseDatabase.getReference("Users");
 
 
         select_image.setOnClickListener(new View.OnClickListener() {
@@ -95,49 +105,56 @@ public class Mainfragment extends Fragment {
                 startActivityForResult(intent, 102);
 
 
-
-
             }
-                                         });
+        });
 
 
-process.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-        Log.i("tag", "after1");
-        if (imagePath != null) {
-            Log.i("tag","aftee");
-           /* ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
-            for (Uri uri : mArrayUri) {*/
-           // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
-                StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/"+System.currentTimeMillis());
-                UploadTask uploadTask = imageReference.putFile(imagePath);
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                      Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        process.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("tag", "after1");
+                if (imagePath != null) {
+                    progressDialog.setMessage("Loading .... Please Wait");
+                    progressDialog.show();
+                    Log.i("tag", "aftee");
+                   // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
+                   // for (Uri uri : mArrayUri) {
+                        // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
+                        StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/" + System.currentTimeMillis());
+                        UploadTask uploadTask = imageReference.putFile(imagePath);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
+                                progressDialog.dismiss();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                                progressDialog.dismiss();
+                            }
+                        });
 
 
+                   // }
 
-        }
-        else{
-            Log.i("tag","hbjcdccccc");
 
-        }
-    }
-});
+                    //startActivity(new Intent(getActivity(),l.class));
+                } else {
+                    Log.i("tag", "hbjcdccccc");
+                    Toasty.error(getActivity(),"No image selected",Toasty.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+
+                }
+            }
+        });
 
 
         return view;
-
     }
+
+
 
    /* @Override
     public void onActivityResult(int requestCode, int resultCode,
@@ -166,6 +183,9 @@ process.setOnClickListener(new View.OnClickListener() {
     }*/
 
 
+
+
+
         @Override
         public void onActivityResult ( int requestCode, int resultCode, @Nullable Intent data){
 
@@ -184,14 +204,40 @@ process.setOnClickListener(new View.OnClickListener() {
 
 
             }
-            else if(requestCode ==RC_TAKE_PHOTO && resultCode == RESULT_OK){
-
+            else if(requestCode ==102 && resultCode == RESULT_OK){
+                /*imagePath = data.getData();
+                filepath = storageReference.child("naya").child(imagePath.getLastPathSegment());
+                filepath.putFile(imagePath).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(getActivity(), "success", Toast.LENGTH_SHORT).show();
+                    }
+                });*/
                 bitmap = (Bitmap) data.getExtras().get("data");
-                users_skinpic.setImageBitmap(bitmap);
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 101);
+
+
+
+               // users_skinpic.setImageBitmap(bitmap);
+                //StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images").child("naya");
+
+
+
 //                imagePath = getRealPathFromURI(getContext(),bitmap);
-                users_skinpic.setImageURI(imagePath);
+             /*   users_skinpic.setImageURI(imagePath);
                 users_skinpic.setAdjustViewBounds(true);
-                Log.i("tag", "after");
+                Log.i("tag", "after");*/
+
+               /* users_skinpic.buildDrawingCache();
+                Bitmap bmap = users_skinpic.getDrawingCache();
+                String encodedImageData =getEncoded64ImageStringFromBitmap(bmap);
+                ref.child(firebaseAuth.getUid()).setValue(encodedImageData);*/
+
+
+
 
 
             }
@@ -211,9 +257,16 @@ process.setOnClickListener(new View.OnClickListener() {
 
 
         }
+/*
+    public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+        byte[] byteFormat = stream.toByteArray();
+        // get the base 64 string
+         imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
 
-
-
+        return imgString;
+    }*/
 
         }
 /*

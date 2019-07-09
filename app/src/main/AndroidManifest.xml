@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/appicon"
@@ -20,14 +21,19 @@
         android:roundIcon="@drawable/appicon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
         <activity
             android:name=".Navdrawer"
             android:label="@string/title_activity_navdrawer"
-            android:theme="@style/AppTheme.NoActionBar">
-
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -40,12 +46,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".Tab_using_fragments">
-
-        </activity>
-        <activity android:name=".UpdateProfile"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
-
+        <activity android:name=".Tab_using_fragments"></activity>
+        <activity
+            android:name=".UpdateProfile"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity android:name=".forgotpassword" />
         <activity
             android:name=".Splashscreen"
