@@ -6,13 +6,15 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="200sp"
+        android:layout_height="0dp"
+        android:layout_weight="6"
         android:id="@+id/users_skinpic"
         android:src="@mipmap/cam"
         />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="2"
         android:orientation="vertical">
 
         <Button
@@ -21,21 +23,21 @@
             android:id="@+id/select_image"
             android:text="@string/Select_image"/>
 
-      <TextView
+    <!--  <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:id="@+id/or"
           android:paddingTop="10dp"
           android:text="@string/OR"
           android:gravity="center"
-          android:layout_gravity="center"/>
+          android:layout_gravity="center"/>-->
 
 
-
+<!--
         <Button
            style="@style/btnstyle"
             android:text="@string/capture_image"
-            android:id="@+id/capture_image"/>
+            android:id="@+id/capture_image"/>-->
         <Button
            style="@style/btnstyle"
             android:text="@string/Process"

@@ -1,5 +1,6 @@
 package com.skincancer.doctro;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -32,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -48,7 +50,7 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 public class Mainfragment extends Fragment {
 
     ImageView users_skinpic;
-    Button select_image, capture_image,process;
+    Button select_image,process;
     Uri imagePath;
     Bitmap bitmap;
     FirebaseAuth firebaseAuth;
@@ -70,12 +72,11 @@ public class Mainfragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.main_fragment, null);
         users_skinpic = view.findViewById(R.id.users_skinpic);
         select_image = view.findViewById(R.id.select_image);
-        capture_image = view.findViewById(R.id.capture_image);
         process = view.findViewById(R.id.process);
         firebaseAuth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(getActivity());
@@ -90,16 +91,30 @@ public class Mainfragment extends Fragment {
         select_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "nmcc", Toast.LENGTH_SHORT).show();
+              /*  Toast.makeText(getActivity(), "nmcc", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Image"), 101);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 101);*/
+                Intent intent = CropImage.activity()
+                        .getIntent(getContext());
+                startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
+/*
+                if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    if (resultCode == RESULT_OK) {
+                        Uri resultUri = result.getUri();
+                        imageView.setImageURI(resultUri);
+                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                        Exception error = result.getError();
+                        Toast.makeText(this, ""+error, Toast.LENGTH_SHORT).show();
+                    }
+                }*/
                 // startActivityForResult(Intent.createChooser(intent,"Select Image"),101);
             }
         });
 
-        capture_image.setOnClickListener(new View.OnClickListener() {
+      /*  capture_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -108,7 +123,7 @@ public class Mainfragment extends Fragment {
 
 
             }
-        });
+        });*/
 
 
         process.setOnClickListener(new View.OnClickListener() {
@@ -200,10 +215,23 @@ public class Mainfragment extends Fragment {
 
     }*/
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+                if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    if (resultCode == RESULT_OK) {
+                        imagePath = result.getUri();
+                        users_skinpic.setImageURI(imagePath);
+                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                        Exception error = result.getError();
+                        Toast.makeText(getActivity(), ""+error, Toast.LENGTH_SHORT).show();
+                    }
+                }
+    }
+    /**/
 
-
-
-
+/*
         @Override
         public void onActivityResult ( int requestCode, int resultCode, @Nullable Intent data){
 
@@ -223,14 +251,14 @@ public class Mainfragment extends Fragment {
 
             }
             else if(requestCode ==102 && resultCode == RESULT_OK){
-                /*imagePath = data.getData();
+                *//*imagePath = data.getData();
                 filepath = storageReference.child("naya").child(imagePath.getLastPathSegment());
                 filepath.putFile(imagePath).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Toast.makeText(getActivity(), "success", Toast.LENGTH_SHORT).show();
                     }
-                });*/
+                });*//*
                 bitmap = (Bitmap) data.getExtras().get("data");
                 Intent intent = new Intent();
                 intent.setType("image/*");
@@ -245,14 +273,14 @@ public class Mainfragment extends Fragment {
 
 
 //                imagePath = getRealPathFromURI(getContext(),bitmap);
-             /*   users_skinpic.setImageURI(imagePath);
+             *//*   users_skinpic.setImageURI(imagePath);
                 users_skinpic.setAdjustViewBounds(true);
-                Log.i("tag", "after");*/
+                Log.i("tag", "after");*//*
 
-               /* users_skinpic.buildDrawingCache();
+               *//* users_skinpic.buildDrawingCache();
                 Bitmap bmap = users_skinpic.getDrawingCache();
                 String encodedImageData =getEncoded64ImageStringFromBitmap(bmap);
-                ref.child(firebaseAuth.getUid()).setValue(encodedImageData);*/
+                ref.child(firebaseAuth.getUid()).setValue(encodedImageData);*//*
 
 
 
@@ -265,16 +293,9 @@ public class Mainfragment extends Fragment {
 
 
 
+        }*/
 
-
-
-
-
-
-
-
-
-        }
+        /**/
 /*
     public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
