@@ -50,7 +50,7 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 public class Mainfragment extends Fragment {
 
     ImageView users_skinpic;
-    Button select_image,process;
+    Button select_image, process;
     Uri imagePath;
     Bitmap bitmap;
     FirebaseAuth firebaseAuth;
@@ -58,9 +58,9 @@ public class Mainfragment extends Fragment {
     ProgressDialog progressDialog;
     DatabaseReference ref;
     FirebaseDatabase firebaseDatabase;
-    StorageReference storageReference,next,filepath;
+    StorageReference storageReference, next, filepath;
     File file;
-    Uri fileUri,pictureUri;
+    Uri fileUri, pictureUri;
     final int RC_TAKE_PHOTO = 1;
     String imgString;
 
@@ -99,6 +99,8 @@ public class Mainfragment extends Fragment {
                 Intent intent = CropImage.activity()
                         .getIntent(getContext());
                 startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
+
+
 /*
                 if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                     CropImage.ActivityResult result = CropImage.getActivityResult(data);
@@ -130,55 +132,54 @@ public class Mainfragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.i("tag", "after1");
-                    if (imagePath != null) {
-                        if(GeneralUtils.isNetworkAvailable(getActivity())) {
-                            progressDialog.setMessage("Loading .... Please Wait");
-                            progressDialog.show();
-                            Log.i("tag", "aftee");
-                            // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
-                            // for (Uri uri : mArrayUri) {
-                            // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
-                            StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/" + System.currentTimeMillis());
-                            UploadTask uploadTask = imageReference.putFile(imagePath);
-                            uploadTask.addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
-                                    progressDialog.dismiss();
-                                }
-                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
-                                    progressDialog.dismiss();
-                                }
-                            });
-
-                        }
-                        // }
-                         else{
-                            new AlertDialog.Builder(getContext())
-                                    .setTitle("Internet Connection Alert")
-                                    .setMessage("Please check your Internet Connection")
-                                    .setPositiveButton("close", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    }).show();
-
-                        }
-
-
-                        //startActivity(new Intent(getActivity(),l.class));
-                    } else {
-                        Log.i("tag", "hbjcdccccc");
-                        Toasty.error(getActivity(), "No image selected", Toasty.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
+                if (imagePath != null) {
+                    if (GeneralUtils.isNetworkAvailable(getActivity())) {
+                        progressDialog.setMessage("Loading .... Please Wait");
+                        progressDialog.show();
+                        Log.i("tag", "aftee");
+                        // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
+                        // for (Uri uri : mArrayUri) {
+                        // irebaseStorage.getInstance().getReference().child("Profiles/"+System.currentTimeMillis());
+                        StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images/" + System.currentTimeMillis());
+                        UploadTask uploadTask = imageReference.putFile(imagePath);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
+                                progressDialog.dismiss();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                                progressDialog.dismiss();
+                            }
+                        });
 
                     }
-                }//
+                    // }
+                    else {
+                        new AlertDialog.Builder(getContext())
+                                .setTitle("Internet Connection Alert")
+                                .setMessage("Please check your Internet Connection")
+                                .setPositiveButton("close", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                }).show();
 
+                    }
+
+
+                    //startActivity(new Intent(getActivity(),l.class));
+                } else {
+                    Log.i("tag", "hbjcdccccc");
+                    Toasty.error(getActivity(), "No image selected", Toasty.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+
+                }
+            }//
 
 
         });
@@ -218,16 +219,16 @@ public class Mainfragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-                if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                    if (resultCode == RESULT_OK) {
-                        imagePath = result.getUri();
-                        users_skinpic.setImageURI(imagePath);
-                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                        Exception error = result.getError();
-                        Toast.makeText(getActivity(), ""+error, Toast.LENGTH_SHORT).show();
-                    }
-                }
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                imagePath = result.getUri();
+                users_skinpic.setImageURI(imagePath);
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                Toast.makeText(getActivity(), "" + error, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
     /**/
 
@@ -277,7 +278,7 @@ public class Mainfragment extends Fragment {
                 users_skinpic.setAdjustViewBounds(true);
                 Log.i("tag", "after");*//*
 
-               *//* users_skinpic.buildDrawingCache();
+     *//* users_skinpic.buildDrawingCache();
                 Bitmap bmap = users_skinpic.getDrawingCache();
                 String encodedImageData =getEncoded64ImageStringFromBitmap(bmap);
                 ref.child(firebaseAuth.getUid()).setValue(encodedImageData);*//*
@@ -295,7 +296,7 @@ public class Mainfragment extends Fragment {
 
         }*/
 
-        /**/
+    /**/
 /*
     public String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -307,7 +308,7 @@ public class Mainfragment extends Fragment {
         return imgString;
     }*/
 
-        }
+            }
 /*
     public Uri getRealPathFromURI(Context context,Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
