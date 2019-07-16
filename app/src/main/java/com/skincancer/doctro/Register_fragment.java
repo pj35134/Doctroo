@@ -1,6 +1,8 @@
 package com.skincancer.doctro;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -114,41 +116,41 @@ public class Register_fragment extends Fragment implements AdapterView.OnItemSel
             @Override
             public void onClick(View v) {
 
-
-                if (validate()) {
-                    //upload database
-                    getUsername = username.getText().toString().trim();
-                    getEmail = email.getText().toString().trim();
-                    getPassword = password.getText().toString().trim();
-                    checkedBtn = view.findViewById(gender.getCheckedRadioButtonId());
-                    genderValue = checkedBtn.getText().toString();
-
-
-                    /* progressBar.setVisibility(View.VISIBLE);*/
-                    progressDialog.setMessage("Loading...Please Wait !!!");
-                    progressDialog.show();
+                if(GeneralUtils.isNetworkAvailable(getActivity())) {
+                    if (validate()) {
+                        //upload database
+                        getUsername = username.getText().toString().trim();
+                        getEmail = email.getText().toString().trim();
+                        getPassword = password.getText().toString().trim();
+                        checkedBtn = view.findViewById(gender.getCheckedRadioButtonId());
+                        genderValue = checkedBtn.getText().toString();
 
 
-                    firebaseAuth.createUserWithEmailAndPassword(getEmail, getPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                progressDialog.dismiss();
-                                /*progressBar.setVisibility(View.GONE);*/
-                                Toasty.success(getActivity(), "Registration Successful", Toast.LENGTH_SHORT).show();
-                                ref.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        // UserProfile userProfile = new UserProfile(getUsername,getEmail);
+                        /* progressBar.setVisibility(View.VISIBLE);*/
+                        progressDialog.setMessage("Loading...Please Wait !!!");
+                        progressDialog.show();
 
-                                        ArrayList<UserProfile> list = new ArrayList<>();
-                                        userProfile.setUserName(getUsername);
-                                        userProfile.setUserEmail(getEmail);
-                                        userProfile.setAge(userAge);
-                                        userProfile.setGender(genderValue);
 
-                                        ref.child(firebaseAuth.getUid()).setValue(userProfile);
-                                        list.add(userProfile);
+                        firebaseAuth.createUserWithEmailAndPassword(getEmail, getPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    progressDialog.dismiss();
+                                    /*progressBar.setVisibility(View.GONE);*/
+                                    Toasty.success(getActivity(), "Registration Successful", Toast.LENGTH_SHORT).show();
+                                    ref.addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            // UserProfile userProfile = new UserProfile(getUsername,getEmail);
+
+                                            ArrayList<UserProfile> list = new ArrayList<>();
+                                            userProfile.setUserName(getUsername);
+                                            userProfile.setUserEmail(getEmail);
+                                            userProfile.setAge(userAge);
+                                            userProfile.setGender(genderValue);
+
+                                            ref.child(firebaseAuth.getUid()).setValue(userProfile);
+                                            list.add(userProfile);
 
 
                                           /*  StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images").child("Profilepic");
@@ -166,53 +168,68 @@ public class Register_fragment extends Fragment implements AdapterView.OnItemSel
                                             });*/
 
 
-                                        // Toast.makeText(Register.this, "successfully upload", Toast.LENGTH_SHORT).show();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
-
-                                    }
-                                });
-
-                                //
-                                if (imagePath != null) {
-                                    StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images").child("Profilepic");
-                                    UploadTask uploadTask = imageReference.putFile(imagePath);
-                                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
+                                            // Toast.makeText(Register.this, "successfully upload", Toast.LENGTH_SHORT).show();
                                         }
-                                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
                                         @Override
-                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                            // Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                            Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+
                                         }
                                     });
 
+                                    //
+                                    if (imagePath != null) {
+                                        StorageReference imageReference = storageReference.child(firebaseAuth.getUid()).child("Images").child("Profilepic");
+                                        UploadTask uploadTask = imageReference.putFile(imagePath);
+                                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getActivity(), "upload failed", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                // Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+
+                                    }
+
+                                    /*finishAffinity();*/
+                                    //startActivity(new Intent(getActivity(),MainActivity.class));
+
+                                } else {
+                                    progressDialog.dismiss();
+
+                                    Toasty.error(getActivity(), "Registration Failed", Toast.LENGTH_SHORT).show();
+
+
                                 }
 
-                                /*finishAffinity();*/
-                                //startActivity(new Intent(getActivity(),MainActivity.class));
-
-                            } else {
-                                progressDialog.dismiss();
-
-                                Toasty.error(getActivity(), "Registration Failed", Toast.LENGTH_SHORT).show();
-
-
                             }
+                        });
 
-                        }
-                    });
 
+                    }
 
                 }
 
 
                 //
+                else{
+
+
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Internet Connection Alert")
+                            .setMessage("Please check your Internet Connection")
+                            .setPositiveButton("close", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).show();
+                }
 
 
             }
