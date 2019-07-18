@@ -124,6 +124,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:checked="true"
+                android:buttonTint="@color/white"
                 android:textColor="@color/white"
                 android:text="@string/Male" />
 
@@ -131,6 +132,7 @@
                 android:id="@+id/female"
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:buttonTint="@color/white"
                 android:textColor="@color/white"
                 android:layout_height="wrap_content"
                 android:text="@string/female" />
