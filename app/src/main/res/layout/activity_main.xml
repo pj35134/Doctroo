@@ -5,20 +5,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/bg_authentication"
+    android:background="#212121"
     tools:context=".MainActivity">
-<TextView
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/loghin_textview"
-    android:text="Login"
-    android:textSize="60dp"
-    android:layout_gravity="center"
-    android:gravity="center"
-    android:fontFamily="@font/birds"
-    android:textColor="@color/white"
-    android:layout_marginVertical="40sp"/>
+    android:layout_marginTop="20dp"
+    android:orientation="vertical">
 
        <EditText
            style="@style/edittext.email"
@@ -33,7 +26,9 @@
         android:id="@+id/rememberme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:buttonTint="@color/white"
         android:layout_margin="10dp"
         android:text="Remember me"
         />
@@ -41,18 +36,32 @@
     <Button
         style="@style/btnstyle"
         android:text="@string/Login"
+        android:textColor="@color/white"
+        android:textSize="20sp"
         android:id="@+id/login"/>
    <!-- <Button
         style="@style/btnstyle"
         android:text="@string/Register"
         android:id="@+id/register"/>-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/forgotpassword"
-        android:textColor="@color/white"
-        android:layout_margin="10dp"
-        android:text="Forgotpassword"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/forgotpassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="28dp"
+            android:layout_marginBottom="10dp"
+            android:text="Forgot password ?"
+            android:textColor="@color/white" />
+    </RelativeLayout>
     <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +69,7 @@
         android:visibility="gone"/>
 
 
-
+</LinearLayout>
 
 
 
