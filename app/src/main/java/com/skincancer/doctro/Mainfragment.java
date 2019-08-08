@@ -1,6 +1,5 @@
 package com.skincancer.doctro;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,13 +8,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.format.DateFormat;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +29,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -42,23 +39,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.theartofdev.edmodo.cropper.CropImage;
-
-import net.gotev.uploadservice.MultipartUploadRequest;
-import net.gotev.uploadservice.UploadNotificationConfig;
-
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 import okhttp3.MediaType;
@@ -67,8 +54,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 
 import static android.app.Activity.RESULT_OK;
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
-import static java.util.UUID.*;
 
 public class Mainfragment extends Fragment {
 
@@ -83,7 +68,9 @@ public class Mainfragment extends Fragment {
     FirebaseDatabase firebaseDatabase;
     StorageReference storageReference, next, filepath;
     File file;
+String okz;
     Uri fileUri;
+    String message;
     String path;
     Uri pictureUri;
     String url="http://192.168.1.69:5000";
@@ -184,11 +171,77 @@ public class Mainfragment extends Fragment {
                                 Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
 
                         // UploadImage();
-
-
-                                Thread t = new Thread(new Runnable() {
+                                AsyncTask asyncTask = new AsyncTask() {
                                     @Override
-                                    public void run() {
+                                    protected Object doInBackground(Object[] objects) {
+                                        File file = new File(path);
+                                        String content_type = getMimeType(file.getPath());
+                                        //  Log.i("hello",content_type);
+
+                                        String file_path = file.getAbsolutePath();
+
+                                        OkHttpClient client = new OkHttpClient();
+                                        Log.i("hello",file_path);
+                                        RequestBody file_body = RequestBody.create(MediaType.parse(content_type),file);
+
+                                        RequestBody request_body = new MultipartBody.Builder()
+                                                .setType(MultipartBody.FORM)
+                                                .addFormDataPart("type",content_type)
+                                                .addFormDataPart("file",file_path.substring(file_path.lastIndexOf("/")+1), file_body)
+                                                .build();
+
+                                        okhttp3.Request request = new okhttp3.Request.Builder()
+                                                .url("http://10.100.20.113:5000")
+                                                .post(request_body)
+                                                .build();
+
+
+                                        try {
+                                            okhttp3.Response response = client.newCall(request).execute();
+                                             okz = response.body().string();
+                                           // okz = "10";
+                                            Log.i("helloo", okz);
+                                            //return okz;
+
+
+                                            if(!response.isSuccessful()){
+                                                throw new IOException("Error : "+response);
+                                            }
+
+
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                return okz;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Object o) {
+                                      //  txtvw.setText(o.toString());
+                                        message=o.toString();
+
+                                        /*new AlertDialog.Builder(getContext())
+                                                .setTitle("Risk factor")
+                                                .setMessage(message)
+                                                .setPositiveButton("close", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                }).show();*/
+                                          Intent intent = new Intent(getContext(), Mainscreen.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("naya", message);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+
+                                    }
+                                }.execute();
+
+                               /*Thread t = new Thread(new Runnable() {
+                                    @Override*/
+                                   /* public void run() {
                                         File file  = new File(path);
                                         String content_type  = getMimeType(file.getPath());
                                         //  Log.i("hello",content_type);
@@ -205,13 +258,16 @@ public class Mainfragment extends Fragment {
                                                 .build();
 
                                         okhttp3.Request request = new okhttp3.Request.Builder()
-                                                .url("http://192.168.1.69:5000")
+                                                .url("http://10.100.20.113:5000")
                                                 .post(request_body)
                                                 .build();
 
 
-                                        try {
-                                            okhttp3.Response response = client.newCall(request).execute();
+                                       try {
+                                        okhttp3.Response response = client.newCall(request).execute();
+                                        // okz = response.body().toString();
+                                        okz = "10";
+                                           Log.i("helloo", okz);
 
                                             if(!response.isSuccessful()){
                                                 throw new IOException("Error : "+response);
@@ -222,10 +278,10 @@ public class Mainfragment extends Fragment {
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
-                                    }
-                                });
+                                    }*/
+                              //  });
 
-                                t.start();
+                               // t.start();
 
 
 
@@ -235,8 +291,31 @@ public class Mainfragment extends Fragment {
 
 
                                 progressDialog.dismiss();
+                                //String message = run();
+                               /* new AlertDialog.Builder(getContext())
+                                        .setTitle("Risk factor")
+                                        .setMessage(message)
+                                        .setPositiveButton("close", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        }).show();*/
+
+
+
+
+                               /* Intent intent = new Intent(getContext(), Mainscreen.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("naya", message);
+                                intent.putExtras(bundle);
+                                startActivity(intent);*/
+
+
+
                             }
                         });
+
 
                     }
                     // }
@@ -379,7 +458,11 @@ Log.i("hello","1");
                             public void onErrorResponse(VolleyError error) {
                                 Toast.makeText(getActivity(), ""+error.toString(), Toast.LENGTH_SHORT).show();
                                 Log.i("hello", String.valueOf(error));
-                            }
+                            }/*try {
+                            i.putExtra("MyData",response.body().string() );
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }*/
                         }
 
                         )
@@ -519,6 +602,47 @@ Log.i("hello","1");
 
         return imgString;
     }*/
+
+
+    public String run() {
+        File file  = new File(path);
+        String content_type  = getMimeType(file.getPath());
+        //  Log.i("hello",content_type);
+
+        String file_path = file.getAbsolutePath();
+        OkHttpClient client = new OkHttpClient();
+        Log.i("hello",file_path);
+        RequestBody file_body = RequestBody.create(MediaType.parse(content_type),file);
+
+        RequestBody request_body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("type",content_type)
+                .addFormDataPart("file",file_path.substring(file_path.lastIndexOf("/")+1), file_body)
+                .build();
+
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url("http://10.100.20.113:5000")
+                .post(request_body)
+                .build();
+
+
+        try {
+            okhttp3.Response response = client.newCall(request).execute();
+            // okz = response.body().toString();
+            okz = "10";
+            Log.i("helloo", okz);
+
+            if(!response.isSuccessful()){
+                throw new IOException("Error : "+response);
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return okz;
+    }
 
             }
 /*
