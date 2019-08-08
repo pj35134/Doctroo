@@ -191,7 +191,7 @@ String okz;
                                                 .build();
 
                                         okhttp3.Request request = new okhttp3.Request.Builder()
-                                                .url("http://10.100.20.113:5000")
+                                                .url("http://192.168.1.69:5000")
                                                 .post(request_body)
                                                 .build();
 

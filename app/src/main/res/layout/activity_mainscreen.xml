@@ -49,6 +49,7 @@
         android:text="High"
         android:layout_centerInParent="true"
         android:layout_gravity="center"
+        android:textColor="@color/white"
         android:background="@drawable/box"
         android:layout_below="@+id/risk"
         android:paddingHorizontal="40dp"
@@ -60,9 +61,10 @@
         android:layout_height="wrap_content"
         android:text="Done"
         android:textSize="20sp"
+        android:textColor="@color/white"
         android:id="@+id/done"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/button_bg"
+        android:background="@color/colorPrimary"
         android:layout_marginTop="20sp"/>
 
 </RelativeLayout>
