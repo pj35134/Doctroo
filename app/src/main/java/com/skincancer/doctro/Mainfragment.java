@@ -21,10 +21,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,7 +42,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import net.gotev.uploadservice.MultipartUploadRequest;
+import net.gotev.uploadservice.UploadNotificationConfig;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,11 +56,19 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 import static android.app.Activity.RESULT_OK;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import static java.util.UUID.*;
 
 public class Mainfragment extends Fragment {
 
@@ -60,7 +83,10 @@ public class Mainfragment extends Fragment {
     FirebaseDatabase firebaseDatabase;
     StorageReference storageReference, next, filepath;
     File file;
-    Uri fileUri, pictureUri;
+    Uri fileUri;
+    String path;
+    Uri pictureUri;
+    String url="http://192.168.1.69:5000";
     final int RC_TAKE_PHOTO = 1;
     String imgString;
 
@@ -97,6 +123,7 @@ public class Mainfragment extends Fragment {
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Image"), 101);*/
                 Intent intent = CropImage.activity()
+                        .setMinCropResultSize(600,450)
                         .getIntent(getContext());
                 startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
 
@@ -136,6 +163,9 @@ public class Mainfragment extends Fragment {
                     if (GeneralUtils.isNetworkAvailable(getActivity())) {
                         progressDialog.setMessage("Loading .... Please Wait");
                         progressDialog.show();
+
+
+
                         Log.i("tag", "aftee");
                         // ArrayList<Uri> mArrayUri = new ArrayList<Uri>();
                         // for (Uri uri : mArrayUri) {
@@ -152,6 +182,58 @@ public class Mainfragment extends Fragment {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+
+                        // UploadImage();
+
+
+                                Thread t = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        File file  = new File(path);
+                                        String content_type  = getMimeType(file.getPath());
+                                        //  Log.i("hello",content_type);
+
+                                        String file_path = file.getAbsolutePath();
+                                        OkHttpClient client = new OkHttpClient();
+                                        Log.i("hello",file_path);
+                                        RequestBody file_body = RequestBody.create(MediaType.parse(content_type),file);
+
+                                        RequestBody request_body = new MultipartBody.Builder()
+                                                .setType(MultipartBody.FORM)
+                                                .addFormDataPart("type",content_type)
+                                                .addFormDataPart("file",file_path.substring(file_path.lastIndexOf("/")+1), file_body)
+                                                .build();
+
+                                        okhttp3.Request request = new okhttp3.Request.Builder()
+                                                .url("http://192.168.1.69:5000")
+                                                .post(request_body)
+                                                .build();
+
+
+                                        try {
+                                            okhttp3.Response response = client.newCall(request).execute();
+
+                                            if(!response.isSuccessful()){
+                                                throw new IOException("Error : "+response);
+                                            }
+
+
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+
+                                t.start();
+
+
+
+
+
+
+
+
                                 progressDialog.dismiss();
                             }
                         });
@@ -222,7 +304,38 @@ public class Mainfragment extends Fragment {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
+
                 imagePath = result.getUri();
+                fileUri=data.getData();
+               // path = getPathFromURI(getContext(),imagePath);
+                path = imagePath.getPath();
+
+                /*try {*/
+                try {
+                    bitmap = (Bitmap) MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagePath);
+                    // bitmap = (Bitmap) data.getExtras().get("data");
+                }catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+              // bitmap = (Bitmap) data.getExtras().get("data");
+               Log.i("tag", String.valueOf(bitmap));
+                // bitmap = result.getBitmap();
+               /*
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+               /* fileUri = data.getData();
+
+                try{
+                    bitmap = (Bitmap) MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), fileUri);
+
+
+                }
+                catch(Exception ex){
+
+                }*/
+
                 users_skinpic.setImageURI(imagePath);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
@@ -230,9 +343,108 @@ public class Mainfragment extends Fragment {
             }
         }
     }
-    /**/
+    public void UploadImage(){
+Log.i("hello","1");
 
-/*
+       /* Map<String, String> params = new HashMap();
+        String imageData = imageTostring(bitmap);*/
+        Log.i("hello","2");
+        //Log.i("hello",imageData);
+        // byte[] imageData = GeneralUtils.getBlob(bitmap);
+
+      /*  params.put("",imageData);
+        Log.i("hello",imageData);*/
+
+        Log.i("hello","3");
+        RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
+
+       // JSONObject parameters = new JSONObject(params);
+
+           StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+               @Override
+               public void onResponse(String response) {
+
+
+
+                               Log.i("hello", response);
+                   Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
+
+                           /* if(response.contains("success")){
+
+                                Toast.makeText(getActivity(), "Image upload", Toast.LENGTH_SHORT).show();
+                            }*/
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(getActivity(), ""+error.toString(), Toast.LENGTH_SHORT).show();
+                                Log.i("hello", String.valueOf(error));
+                            }
+                        }
+
+                        )
+           {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Log.i("tag","smmm");
+                                Map<String, String> params = new HashMap<>();
+                               String imageData = imageTostring(bitmap);
+                               Log.i("tag",imageData);
+                               // byte[] imageData = GeneralUtils.getBlob(bitmap);
+
+                                params.put("images",imageData);
+                                return params;
+
+                            }
+                        };
+        /*requestQueue.getCache().clear();*/
+        requestQueue.add(stringRequest);
+
+    }
+  /*  private String getPath(Uri uri) {
+
+        Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        String document_id = cursor.getString(0);
+        document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
+        cursor = getActivity().getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, MediaStore.Images.Media._ID + "=?", new String[]{document_id}, null
+        );
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+        return path;
+    }*/
+
+    private String imageTostring(Bitmap bitmap){
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+    byte[] imageBytes = outputStream.toByteArray();
+    String encodedImage = Base64.encodeToString(imageBytes,Base64.DEFAULT);
+    return encodedImage;
+    }
+    /**/
+    private String getMimeType(String path) {
+
+        String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
+
+    public String getPathFromURI(Context context, Uri contentUri) {
+
+
+
+            String[] proj = { MediaStore.Images.Media.DATA };
+           Cursor cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+
+    }
+
+
+    /*
         @Override
         public void onActivityResult ( int requestCode, int resultCode, @Nullable Intent data){
 
