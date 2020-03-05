@@ -34,6 +34,7 @@ Button save;
 FirebaseAuth firebaseAuth;
 String name,gtemail;
 RadioGroup gender;
+Button np;
 RadioButton male,female;
 DatabaseReference databaseReference;
 String gtage;
